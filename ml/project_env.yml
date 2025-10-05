@@ -1,4 +1,4 @@
-name: D:\stc_project_25\stcmodel
+name: stcmodel
 channels:
   - conda-forge
   - nvidia
@@ -349,4 +349,3 @@ dependencies:
       - torchvision==0.23.0
       - webdriver-manager==4.0.2
       - xgboost==3.0.5
-prefix: D:\stc_project_25\stcmodel
