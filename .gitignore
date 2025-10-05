@@ -1,0 +1,54 @@
+# Environments & Credentials
+/venv/
+/env/
+/.venv/
+/.env/
+.env
+.stcmodel
+/.stcmodel/
+/stcmodel/
+.artifacts
+pyproject.toml
+clinical_bigbird_symptom_classifier/
+.stc_model_env
+/.stc_model_env/
+/stc_model_env/
+
+# Data, Models & Checkpoints
+/data/
+/datasets/
+/models/
+/checkpoints/
+*.pkl
+*.pickle
+*.h5
+*.pth
+*.pt
+*.pb
+*.onnx
+*.joblib
+
+# Python Caches & Artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.cache/
+/build/
+/dist/
+*.egg-info
+
+# Logs & Experiment Tracking
+*.log
+/logs/
+/mlruns/
+/runs/
+
+# IDE & Notebooks
+.idea/
+.vscode/
+.ipynb_checkpoints/
+
+# OS-specific
+.DS_Store
+Thumbs.db

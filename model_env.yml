@@ -1,0 +1,24 @@
+name: stc_model_env
+channels:
+  - pytorch-nightly
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch::pytorch=2.7.0
+  - pytorch::torchvision
+  - pytorch::torchaudio
+  - pytorch-cuda=12.1
+  - pandas
+  - openpyxl
+  - numpy
+  - pip
+  - pip:
+    - transformers
+    - datasets
+    - evaluate
+    - accelerate
+    - bitsandbytes
+    - ipykernel
