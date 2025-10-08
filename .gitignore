@@ -27,6 +27,7 @@ clinical_bigbird_symptom_classifier/
 # --------------------------
 # Data and model directories
 /data/
+data/
 /datasets/
 /models/
 /checkpoints/

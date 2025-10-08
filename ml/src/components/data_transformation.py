@@ -4,7 +4,7 @@ from src.logger import logging
 import os
 import sys
 from dataclasses import dataclass
-from datasets import load_dataset, Features, ClassLabel, Value, Dataset
+from datasets import Features, ClassLabel, Value, Dataset
 from transformers import AutoTokenizer
 
 @dataclass

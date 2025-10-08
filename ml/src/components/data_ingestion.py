@@ -1,7 +1,6 @@
 import os
 import sys
 from src.exception import CustomExeception
-from sklearn.model_selection import train_test_split
 from src.logger import logging
 from dataclasses import dataclass
 import pandas as pd
@@ -19,7 +18,7 @@ class DataIngestion:
     def initiate_funetuning_data_ingestion(self):
         logging.info("Data Ingestion started")
         try:
-            df = pd.read_excel('D:/stc_project_25/ml/notebook/data/Disease_classification.xlsx')
+            df = pd.read_excel('D:/stc_project_25/ml/notebook/data/for_test_Disease_classification.xlsx')
             logging.info('Read the raw data')
 
             os.makedirs(os.path.dirname(self.dataingestionconfig.raw_data_path), exist_ok=True)
