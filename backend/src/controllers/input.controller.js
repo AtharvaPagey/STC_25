@@ -3,17 +3,6 @@ import { User } from "../models/user.models.js";
 import { MainDisease } from "../models/maindisease.models.js";
 
 
-async function runAggregationPipeline(collection, pipeline) {
-  try {
-    const resultsArray = await collection.aggregate(pipeline).toArray();
-    const resultsJson = JSON.stringify(resultsArray, null, 2);
-    return resultsJson;
-  } catch (error) {
-    console.error(`An error occurred: ${error}`);
-    return null;
-  }
-}
-
 async function getDetailedPreviousDiseasesForUser(userId) {
     try {
         const pipeline = [
@@ -119,6 +108,5 @@ async function getTreatmentsForDisease(diseaseName) {
 
 export{
     getDetailedPreviousDiseasesForUser,
-    getTreatmentsForDisease, 
-    runAggregationPipeline
+    getTreatmentsForDisease
 }

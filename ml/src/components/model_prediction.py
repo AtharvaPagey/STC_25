@@ -21,6 +21,8 @@ class Model_Prediction:
             tokenizer = AutoTokenizer.from_pretrained(DataTransformationConfig().preprocessor_obj_file_path)
             logging.info("called the tokenizer")
 
+            
+
 
         except Exception as e:
             raise CustomExeception(e, sys)
