@@ -22,7 +22,7 @@ const generateAccessAndRefereshTokens = async(userId) =>{
     }
 }
 
-const handleFirebaseLoginOrRegister = asyncHandler(async (req, res) => {
+const LoginOrRegister = asyncHandler(async (req, res) => {
     const { uid, email } = req.firebaseUser;
 
     if (!uid || !email) {
@@ -174,7 +174,7 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
 });
 
 export {
-    handleFirebaseLoginOrRegister,
+    LoginOrRegister,
     logoutUser,
     refreshAccessToken,
     getCurrentUser,

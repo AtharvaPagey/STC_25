@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 import { User } from "../models/user.models.js";
 import { MainDisease } from "../models/maindisease.models.js";
-import { MongoClient } from "mongodb";
+import { occupationlst } from "../models/occupationlists.models.js";
+import {ApiResponse} from "../utils/ApiResponse.js";
 import fs from "fs";
 import csv from "csv-parser";
+import { ApiError } from "./APIError.js";
 
 async function getDetailedPreviousDiseasesForUser(userId) {
     try {
@@ -50,10 +52,10 @@ async function getDetailedPreviousDiseasesForUser(userId) {
             }
         ];
 
-        const previousDiseases = await User.aggregate(pipeline);
-
-        return previousDiseases;
-
+        if (mongoose.connection.readyState == 1){
+            const previousDiseases = await User.aggregate(pipeline);
+            return previousDiseases;
+        }
     } catch (error) {
         console.error("Error fetching previous diseases:", error);
         throw new Error("Could not retrieve detailed disease history for the user.");
@@ -96,34 +98,30 @@ async function getTreatmentsForDisease(diseaseName) {
             }
         ];
 
-        const results = await MainDisease.aggregate(pipeline);
-
-        return results.length > 0 ? results[0] : null;
-
+        if(mongoose.connection.readyState == 1){
+            const results = await MainDisease.aggregate(pipeline);
+            return results.length > 0 ? results[0] : null;
+        }
     } catch (error) {
         console.error("Error retrieving treatments for disease:", error);
         throw new Error("Could not retrieve treatments.");
     }
 }
 
-async function uploadCsvToAtlas(filePath, collectionName) {
-    const MONGO_URI = process.env.MONGO_DB_CONNECTION_STRING;
-    const DB_NAME = "your_database";
-
-    const client = new MongoClient(MONGO_URI);
+async function uploaddata(filePath, collectionName) {
     const data = [];
 
     try {
-        await new Promise((resolve, reject) => {
+        await new Promise((res, rec) => {
             fs.createReadStream(filePath)
-                .on("error", (error) => reject(error))
+                .on("error", (error) => rec(error))
                 .pipe(csv())
                 .on("data", (row) => {
                     data.push(row);
                 })
                 .on("end", () => {
                     console.log(`Read ${data.length} rows from ${filePath}`);
-                    resolve();
+                    res();
                 });
         });
 
@@ -132,30 +130,17 @@ async function uploadCsvToAtlas(filePath, collectionName) {
             return true;
         }
 
-        await client.connect();
-        const db = client.db(DB_NAME);
-        const collection = db.collection(collectionName);
-        console.log(`Successfully connected to database '${DB_NAME}' and collection '${collectionName}'.`);
-
-        const result = await collection.insertMany(data);
-        console.log(`Successfully uploaded ${result.insertedCount} documents to MongoDB Atlas.`);
-        return true;
-
-    } catch (error) {
-        if (error.code === 'ENOENT') {
-            console.error(`ERROR: The file was not found at ${filePath}`);
-        } else {
-            console.error(`ERROR: An unexpected error occurred: ${error}`);
+        if(mongoose.connection.readyState == 1){
+            const result = await collection.insertMany(data);
         }
-        return false;
-    } finally {
-        await client.close();
-        console.log("MongoDB connection closed.");
+        return new ApiResponse(200, `Successfully uploaded ${result.insertedCount} documents to MongoDB Atlas.`);
+    } catch (error) {
+        throw new ApiError(`An unexpected error occurred: ${error}`);
     }
 }
 
 export {
     getDetailedPreviousDiseasesForUser,
     getTreatmentsForDisease,
-    uploadCsvToAtlas
+    uploaddata
 }

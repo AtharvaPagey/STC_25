@@ -2,7 +2,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import pandas as pd
 import numpy as np
 import sys
-import os
+import torch
 from src.exception import CustomExeception
 from src.logger import logging
 from src.components.data_ingestion import prediction_data_ingestion
@@ -21,8 +21,20 @@ class Model_Prediction:
             tokenizer = AutoTokenizer.from_pretrained(DataTransformationConfig().preprocessor_obj_file_path)
             logging.info("called the tokenizer")
 
-            
+            data = prediction_data_ingestion()
+            text = prediction_data_transformation(data)
 
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            model.to(device)
+            inputs = tokenizer(text, return_tensors="pt").to(device)
+
+            with torch.no_grad():
+                outputs = model(**inputs)
+                logits = outputs.logits
+                pred_class_id = torch.argmax(logits, dim = -1).item()
+                predicted_label = model.config.id2label[pred_class_id]
+            
+            return (predicted_label)
 
         except Exception as e:
             raise CustomExeception(e, sys)

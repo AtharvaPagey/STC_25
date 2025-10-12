@@ -34,7 +34,29 @@ class DataIngestion:
         
     def prediction_data_ingestion(self):
         try:
-            pass
+            foodday1 = ''
+            foodday2 = ''
+            foodday3 = ''
+            foodday4 = ''
+            foodday5 = ''
+            age = ''
+            gender = ''
+            travel_history = '' 
+            symptoms = ''
+            occupation=''
+
+            food = foodday1 + foodday2 + foodday3 + foodday4 + foodday5
+
+            new_row = {
+                'food':food,
+                'age' : age,
+                'gender' : gender,
+                'occupation' : occupation,
+                'travel_history' : travel_history,
+                'symptoms' : symptoms
+            }
+
+            return new_row
         except Exception as e:
             raise CustomExeception(e, sys)
         
