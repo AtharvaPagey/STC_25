@@ -5,6 +5,14 @@ import jwt from "jsonwebtoken";
 
 const userSchema = new Schema(
     {
+        fullname:{
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true, 
+            index: true
+        },
         username: {
             type: String,
             required: true,
@@ -12,6 +20,11 @@ const userSchema = new Schema(
             lowercase: true,
             trim: true, 
             index: true
+        },
+        firebaseUID:{
+            type: String,
+            required: true,
+            unique: true,
         },
         email: {
             type: String,

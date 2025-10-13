@@ -110,7 +110,6 @@ async function getTreatmentsForDisease(diseaseName) {
 
 async function uploaddata(filePath, collectionName) {
     const data = [];
-
     try {
         await new Promise((res, rec) => {
             fs.createReadStream(filePath)

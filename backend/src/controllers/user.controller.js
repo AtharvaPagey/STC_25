@@ -4,6 +4,23 @@ import { User} from "../models/user.models.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
 
+// add all the controllers to routes
+// add the routes to index.js
+// finish all the connections
+// check all the controllers are working or not 
+
+
+const predictdiseaseandmed = asyncHandler(async(req, res) => {
+    try{
+        // take input using const symptoms = req.body.symptoms
+        // then call the ml predictor here and get the output (present in model_prediction)
+        // then call dbimportexport utils to get the meds and the yogasanas
+        // save the disease and meds to atlas using another dbimportexport
+        // return a json of the output
+    }catch(error){
+        throw new ApiError(500, `This Error occured: ${error}`)
+    }
+})
 
 const generateAccessAndRefereshTokens = async(userId) =>{
     try {
