@@ -1,0 +1,24 @@
+name: stc_model_env
+channels:
+  - pytorch-nightly
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch=2.6.0
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=12.1
+  - pandas
+  - scikit-learn
+  - pip
+  - pip:
+    - transformers
+    - datasets
+    - evaluate
+    - accelerate
+    - bitsandbytes
+    - "thefuzz[python-Levenshtein]"
+    - ipykernel
