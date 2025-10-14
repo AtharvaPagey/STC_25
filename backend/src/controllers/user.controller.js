@@ -3,6 +3,7 @@ import {ApiError} from "../utils/APIError.js"
 import { User} from "../models/user.models.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
+import {model_predictor} from "..ml/src/components/model_prediction.py";
 
 // add all the controllers to routes
 // add the routes to index.js
@@ -12,11 +13,33 @@ import jwt from "jsonwebtoken"
 
 const predictdiseaseandmed = asyncHandler(async(req, res) => {
     try{
-        // take input using const symptoms = req.body.symptoms
-        // then call the ml predictor here and get the output (present in model_prediction)
-        // then call dbimportexport utils to get the meds and the yogasanas
-        // save the disease and meds to atlas using another dbimportexport
-        // return a json of the output
+        const user = await User.findById(userId)
+        const age = user.schema.age
+        const gender = user.schema.gender
+        const symptoms = req.body.symptoms
+        const travelhistory = req.body.travelhistory
+        const occupation = req.body.occupation
+        const day1 = req.body.day1
+        const day2 = req.body.day2
+        const day3 = req.body.day3
+        const day4 = req.body.day4
+        const day5 = req.body.day5
+
+        const raw_data = {
+            'day1' : day1,
+            'day2' : day2,
+            'day3' : day3,
+            'day4' : day4,
+            'day5' : day5,
+            'age' : age,
+            'gender' : gender,
+            'symptoms' : symptoms,
+            'travelhistory' : travelhistory,
+            'occupation' : occupation
+        }
+        
+        const diseasename = model_predictor(raw_data)
+
     }catch(error){
         throw new ApiError(500, `This Error occured: ${error}`)
     }
@@ -195,5 +218,6 @@ export {
     logoutUser,
     refreshAccessToken,
     getCurrentUser,
-    updateAccountDetails
+    updateAccountDetails,
+    predictdiseaseandmed
 }

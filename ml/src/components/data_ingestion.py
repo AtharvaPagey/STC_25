@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import pandas as pd
 from src.components.data_transformation import DataTranformation
 from src.components.model_finetuner import ModelFinetuner
+from src.components.model_prediction import Model_Prediction
 
 @dataclass
 class DataIngestionConfig:
@@ -15,10 +16,10 @@ class DataIngestion:
     def __init__(self):
         self.dataingestionconfig = DataIngestionConfig()
     
-    def initiate_funetuning_data_ingestion(self):
+    def initiate_funetuning_data_ingestion(self, finetune_data_path):
         logging.info("Data Ingestion started")
         try:
-            df = pd.read_excel('D:/stc_project_25/ml/notebook/data/for_test_Disease_classification.xlsx')
+            df = pd.read_excel(finetune_data_path)
             logging.info('Read the raw data')
 
             os.makedirs(os.path.dirname(self.dataingestionconfig.raw_data_path), exist_ok=True)
@@ -32,28 +33,23 @@ class DataIngestion:
         except Exception as e:
             raise CustomExeception(e, sys)
         
-    def prediction_data_ingestion(self):
+    def prediction_data_ingestion(self, data: dict):
         try:
-            foodday1 = ''
-            foodday2 = ''
-            foodday3 = ''
-            foodday4 = ''
-            foodday5 = ''
-            age = ''
-            gender = ''
-            travel_history = '' 
-            symptoms = ''
-            occupation=''
-
-            food = foodday1 + foodday2 + foodday3 + foodday4 + foodday5
+            food = (
+                data.get('foodday1', '') + 
+                data.get('foodday2', '') + 
+                data.get('foodday3', '') + 
+                data.get('foodday4', '') + 
+                data.get('foodday5', '')
+            )
 
             new_row = {
-                'food':food,
-                'age' : age,
-                'gender' : gender,
-                'occupation' : occupation,
-                'travel_history' : travel_history,
-                'symptoms' : symptoms
+                'food': food,
+                'age': data.get('age'),
+                'gender': data.get('gender'),
+                'occupation': data.get('occupation'),
+                'travel_history': data.get('travel_history'),
+                'symptoms': data.get('symptoms')
             }
 
             return new_row
@@ -62,8 +58,10 @@ class DataIngestion:
         
 
 if __name__ == "__main__":
+    finetune_data_path = 'D:/stc_project_25/ml/notebook/data/for_test_Disease_classification.xlsx'    
+
     d = DataIngestion()
-    data_path = d.initiate_funetuning_data_ingestion()
+    data_path = d.initiate_funetuning_data_ingestion(finetune_data_path)
 
     t = DataTranformation()
     labels, tokenized_dataset, preprocessor_path = t.funetuning_datatransformer(data_path)

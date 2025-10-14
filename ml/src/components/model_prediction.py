@@ -14,14 +14,14 @@ class Model_Prediction:
     def __init__(self):
         pass
 
-    def model_data_prediction(self):
+    def model_data_prediction(self, raw_data):
         try:
             model = AutoModelForSequenceClassification.from_pretrained(ModelFinetunerConfig().model_obj_path)
             logging.info("called the model")
             tokenizer = AutoTokenizer.from_pretrained(DataTransformationConfig().preprocessor_obj_file_path)
             logging.info("called the tokenizer")
 
-            data = prediction_data_ingestion()
+            data = prediction_data_ingestion(raw_data)
             text = prediction_data_transformation(data)
 
             device = "cuda" if torch.cuda.is_available() else "cpu"
