@@ -110,30 +110,37 @@ async function getTreatmentsForDisease(diseaseName) {
 async function uploaddata(filePath, Model) {
     const data = [];
     try {
-        await new Promise((res, rec) => {
+        await new Promise((resolve, reject) => {
             fs.createReadStream(filePath)
-                .on("error", (error) => rec(error))
+                .on("error", (error) => reject(error))
                 .pipe(csv())
                 .on("data", (row) => {
                     data.push(row);
                 })
                 .on("end", () => {
                     console.log(`Read ${data.length} rows from ${filePath}`);
-                    res();
+                    resolve();
                 });
         });
 
         if (data.length === 0) {
             console.log("CSV file is empty. Nothing to upload.");
-            return true;
+            return new ApiResponse(200, "CSV file was empty. No data uploaded.");
         }
 
-        if(mongoose.connection.readyState == 1){
+        if (mongoose.connection.readyState === 1) {
             const result = await Model.insertMany(data);
+            return new ApiResponse(200, `Successfully uploaded ${result.length} documents.`);
+        } else {
+            throw new ApiError(503, "Database is not connected. Cannot upload data.");
         }
-        return new ApiResponse(200, `Successfully uploaded ${result.insertedCount} documents to MongoDB Atlas.`);
+
     } catch (error) {
-        throw new ApiError(`An unexpected error occurred: ${error}`);
+        console.error("Data upload failed:", error);
+        if (error instanceof ApiError) {
+            throw error;
+        }
+        throw new ApiError(500, `An unexpected error occurred: ${error.message}`);
     }
 }
 

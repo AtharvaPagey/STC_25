@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const connectDB = async () =>{
     try{
-        const connectionInstance = await mongoose.connect(`${process.env.MONGO_DB_CONNECTION_STRING}/sample_mflix`);
+        const connectionInstance = await mongoose.connect(`${process.env.MONGO_DB_CONNECTION_STRING}/web_data`);
         console.log("\nMongodb connected");
         return true;
     }catch(error){
