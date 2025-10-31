@@ -86,7 +86,7 @@ const predictdiseaseandmed = asyncHandler(async (req, res) => {
 
   try {
     const predictionResponse = await axios.post(
-      "http://localhost:5000/predict",
+      "http://localhost:5001/predict",
       raw_data
     );
     const diseaseName = predictionResponse.data.diseaseName;

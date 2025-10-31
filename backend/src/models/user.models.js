@@ -3,116 +3,63 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
-<<<<<<< HEAD
     {
-        username: {
-            type: String,
-            required: true,
-            unique: true,
-            lowercase: true,
-            trim: true,
-            index: true
-        },
-        email: {
-            type: String,
-            required: true,
-            unique: true,
-            lowercase: true,
-            trim: true,
-        },
-        fullname: {
-            type: String,
-            required: true,
-            trim: true,
-            index: true
-        },
-        firebaseUID: {
-            type: String,
-            required: true,
-            unique: true,
-            index: true
-        },
-
-        age: {
-            type: String
-        },
-
-        gender: {
-            type: String,
-            required: true,
-        },
-
-        role: {
-            type: String,
-            enum: ['USER', 'ADMIN'],
-            default: 'USER'
-        },
-
-        prevDisease: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "PrevDisease"
-            }
-        ],
-        refreshToken: {
-            type: String
-        },
-        password: {
-            type: String
-        }
-=======
-  {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      index: true,
->>>>>>> cc83d6dbb9e118aaf63c60c54324ac5ec61bd273
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    fullname: {
-      type: String,
-      required: true,
-      trim: true,
-      index: true,
-    },
-    firebaseUID: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
-
-    age: {
-      type: String,
-    },
-
-    role: {
-      type: String,
-      enum: ["USER", "ADMIN"],
-      default: "USER",
-    },
-
-    prevDisease: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "PrevDisease",
+      username: {
+          type: String,
+          required: true,
+          unique: true,
+          lowercase: true,
+          trim: true,
+          index: true
       },
-    ],
-    refreshToken: {
-      type: String,
-    },
-    password: {
-      type: String,
-    },
+      email: {
+          type: String,
+          required: true,
+          unique: true,
+          lowercase: true,
+          trim: true,
+      },
+      fullname: {
+          type: String,
+          required: true,
+          trim: true,
+          index: true
+      },
+      firebaseUID: {
+          type: String,
+          required: true,
+          unique: true,
+          index: true
+      },
+
+      age: {
+          type: String
+      },
+
+      gender: {
+          type: String,
+          required: true,
+          default: 'Male'
+      },
+
+      role: {
+          type: String,
+          enum: ['USER', 'ADMIN'],
+          default: 'USER'
+      },
+
+      prevDisease: [
+          {
+              type: Schema.Types.ObjectId,
+              ref: "PrevDisease"
+          }
+      ],
+      refreshToken: {
+          type: String
+      },
+      password: {
+          type: String
+      }
   },
   {
     timestamps: true,
