@@ -1,4 +1,3 @@
-// src/components/Dashboard/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import api from "../../api/axiosInstance";
 import TreatmentList from "./TreatmentList";
@@ -12,25 +11,30 @@ export default function Dashboard({ user }) {
   const [showNew, setShowNew] = useState(false);
   const [resultData, setResultData] = useState(null);
   const [showFinetune, setShowFinetune] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        // try to get user's previous disease details (your backend util expects getDetailedPreviousDiseasesForUser)
-        const res = await api.get("/users/current-user");
-        // Optionally fetch prevDiseases using a backend endpoint; here we just fetch user and then use available prevDisease
-        // For list of saved treatments, backend may provide /treatments/my - adapt if route differs
-        // We'll try /users/prev-diseases (if exists) else fallback to empty
-        // For now fetch treatments via custom endpoint if exists:
+        setLoading(true);
+        // Fetch current user
+        const userRes = await api.get("/users/current-user");
+        console.log("User data:", userRes.data);
+
+        // Try to fetch previous diseases/treatments
         try {
-          const t = await api.get("/treatments/my");
-          setTreatments(t.data?.data || []);
+          const treatmentsRes = await api.get("/users/prev-diseases");
+          setTreatments(treatmentsRes.data?.data || []);
         } catch (err) {
-          // no treatments endpoint; leave blank
+          console.log("No previous treatments endpoint or no data");
           setTreatments([]);
         }
       } catch (e) {
-        console.error(e);
+        console.error("Error loading dashboard:", e);
+        setError("Failed to load dashboard data");
+      } finally {
+        setLoading(false);
       }
     };
     load();
@@ -38,17 +42,35 @@ export default function Dashboard({ user }) {
 
   const onNewSubmit = async (payload) => {
     try {
-      // backend expects POST /users/predict (verifyJWT middleware) - we must include access token (axiosInstance includes it)
       const res = await api.post("/users/predict", payload);
-      // backend returns ApiResponse structure; actual data may be in res.data.data
       const output = res?.data?.data || res?.data;
       setResultData(output);
-      // you can also update the list by pushing a new entry (if backend returns 'treatment')
+      setShowNew(false);
+
+      // Optionally reload treatments after new prediction
+      // const treatmentsRes = await api.get("/users/prev-diseases");
+      // setTreatments(treatmentsRes.data?.data || []);
     } catch (e) {
-      console.error(e);
-      alert("Submission failed");
+      console.error("Prediction error:", e);
+      alert(e.response?.data?.message || "Submission failed");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6">
@@ -57,14 +79,14 @@ export default function Dashboard({ user }) {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setShowNew(true)}
-            className="bg-green-600 text-white px-3 py-2 rounded"
+            className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700"
           >
             New Treatment
           </button>
           {user && user.email === "admin@yourdomain.com" && (
             <button
               onClick={() => setShowFinetune(true)}
-              className="bg-yellow-500 px-3 py-2 rounded"
+              className="bg-yellow-500 px-3 py-2 rounded hover:bg-yellow-600"
             >
               Finetune
             </button>
