@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 import threading
-import time
 import uuid
 import os
 import pandas as pd
@@ -8,7 +7,7 @@ from datasets import Dataset
 from transformers import AutoTokenizer
 from src.logger import logging
 from src.components.model_prediction import Model_Prediction
-from src.components.data_transformation import DataTranformation
+from src.components.data_transformation import DataTransformationConfig
 from src.components.model_finetuner import ModelFinetuner, ModelFinetunerConfig
 
 
@@ -20,7 +19,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs('artifacts', exist_ok=True)
 
 SAVED_MODEL_PATH = ModelFinetunerConfig().model_obj_path
-TOKENIZER_PATH = DataTranformation().preprocessor_obj_file_path
+TOKENIZER_PATH = DataTransformationConfig().preprocessor_obj_file_path
 BASE_MODEL_NAME = "yikuan8/Clinical-BigBird"
 
 
@@ -30,8 +29,8 @@ prediction_pipeline = Model_Prediction()
 def handle_prediction():
     try:
         raw_data = request.get_json()
-        if not raw_data or 'text' not in raw_data:
-            return jsonify({"error": "No 'text' field provided in JSON"}), 400
+        if not raw_data:
+            return jsonify({"error": "No field provided in JSON"}), 400
         
         predicted_label = prediction_pipeline.model_data_prediction(raw_data)
         
@@ -48,11 +47,7 @@ def run_finetuning_task(job_id, filepath, labels_list):
     
     try:
         logging.info(f"[Job {job_id}] Loading base tokenizer {BASE_MODEL_NAME}...")
-        if not os.path.exists(TOKENIZER_PATH):
-            tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME)
-            tokenizer.save_pretrained(TOKENIZER_PATH)
-        else:
-            tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH)
+        tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH)
 
         logging.info(f"[Job {job_id}] Loading XLSX and converting to Dataset...")
         df = pd.read_excel(filepath)
@@ -150,7 +145,9 @@ def get_job_status(job_id):
 
 
 if __name__ == '__main__':
-    print("app running")
+    print("app is running")
+    # always run like this in cmd
+    # python -m src.finetune_app
     logging.info("the app stsrted running")
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5001, debug=True)
 

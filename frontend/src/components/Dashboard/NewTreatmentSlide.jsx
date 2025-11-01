@@ -25,7 +25,7 @@ export default function NewTreatmentSlide({ onClose, onSubmit }) {
         symptoms,
         travelHistory,
         occupation,
-        dailyData: foods.filter((f) => f.trim() !== ""), // Remove empty entries
+        dailyData: foods.filter((f) => f.trim() !== ""),
       });
     } catch (error) {
       console.error("Submit error:", error);

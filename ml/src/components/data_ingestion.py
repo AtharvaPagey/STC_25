@@ -55,18 +55,3 @@ class DataIngestion:
             return new_row
         except Exception as e:
             raise CustomExeception(e, sys)
-        
-
-if __name__ == "__main__":
-    finetune_data_path = 'D:/STC_25/ml/notebook/data/for_final_finetuning_Disease_classification_1.xlsx'    
-
-    d = DataIngestion()
-    data_path = d.initiate_funetuning_data_ingestion(finetune_data_path)
-
-    t = DataTranformation()
-    labels, tokenized_dataset, preprocessor_path = t.funetuning_datatransformer(data_path)
-
-    f = ModelFinetuner()
-    model_path = f.FineTuning(labels, tokenized_dataset, preprocessor_path)
-
-    print("Model Fine Tuning is done")
