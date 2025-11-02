@@ -7,27 +7,31 @@ import {
     getCurrentUser,
     updateAccountDetails,
     predictdiseaseandmed,
-    deleteUser
+    deleteUser,
 } from "../controllers/user.controller.js";
-import { verifyJWT } from "../middlewares/auth.middlewares.js";
-import { verifyFirebaseToken } from "../middlewares/auth.middlewares.js";
+import { verifyJWT, verifyFirebaseToken } from "../middlewares/auth.middlewares.js";
 
 const router = Router();
 
 router.route("/login").post(verifyFirebaseToken, LoginOrRegister);
 router.route("/refresh-token").post(refreshAccessToken);
-router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/current-user").get(verifyJWT, getCurrentUser);
-router.route("/update-details").patch(verifyJWT, updateAccountDetails);
-router.route("/delete-account").delete(verifyJWT, deleteUser);
+
+router.use(verifyJWT);
+router.route("/logout").post(logoutUser);
+router.route("/current-user").get(getCurrentUser);
+router.route("/update-details").patch(updateAccountDetails);
+router.route("/delete-account").delete(deleteUser);
 
 router.route("/predict").post(
-    verifyJWT,
     [
-        body('symptoms', 'Symptoms are required').notEmpty().isString(),
-        body('dailyData', 'Daily data must be an array').notEmpty().isString(),
-        body('travelHistory').optional().isString(),
-        body('occupation').optional().isString()
+        body("symptoms", "Symptoms are required").notEmpty().isString(),
+        body("dailyData", "Daily data must be a non-empty array")
+        .isArray({ min: 1 }),
+        body("dailyData.*", "Each item in dailyData must be an object")
+        .isObject(),
+
+        body("travelHistory").optional().isString(),
+        body("occupation").optional().isString(),
     ],
     predictdiseaseandmed
 );

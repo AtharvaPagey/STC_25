@@ -13,7 +13,7 @@ from thefuzz import process, fuzz
 
 @dataclass
 class DataTransformationConfig:
-    preprocessor_obj_file_path: str = os.path.join('artifacts', 'preprocessor.pkl')
+    preprocessor_obj_file_path: str = os.path.join('artifacts', 'preprocessor')
 
 class DataTranformation:
     def __init__(self):
@@ -71,25 +71,23 @@ class DataTranformation:
             food = ', Food Eaten in Last 5 Days ' + food
             logging.info("data cleaning has started")
 
-            age = ' of age ' + data['age']
-            if not age.isdigit():
-                raise CustomExeception("Age not given", sys)
+            age = ' of age ' + str(data['age'])
             
-            gender = 'A ' + data['gender']
+            gender = 'A ' + str(data['gender'])
 
-            occupation = data['occupation']
+            occupation = str(data['occupation'])
             extra_info = ""
             if occupation != "":
                 occupation, extra_info = DataTranformation.clean_occupation_pipeline(data['occupation'])
                 occupation = ', Occupation is ' + occupation
 
-            travel_history = data['travel_history']
+            travel_history = str(data['travel_history'])
             if travel_history != "":
                 travel_history = ', Recently Traveled to ' + travel_history
 
-            symptoms = ', Symptoms are ' + data['symptoms']
+            symptoms = ', Symptoms are ' + str(data['symptoms'])
             logging.info("Data cleaning done and text created")
-            text = gender + age + occupation + travel_history + symptoms + food + extra_info
+            text = str(gender + age + occupation + travel_history + symptoms + food + extra_info)
             return(text)
 
         except Exception as e:

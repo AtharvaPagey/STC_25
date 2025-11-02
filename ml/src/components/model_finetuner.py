@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelFinetunerConfig:
-    model_obj_path: str = os.path.join('artifacts', 'model.pkl')
+    model_obj_path: str = os.path.join('artifacts', 'model')
 
 class ModelFinetuner:
     def __init__(self):

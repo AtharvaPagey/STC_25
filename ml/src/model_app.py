@@ -33,7 +33,6 @@ def handle_prediction():
             return jsonify({"error": "No field provided in JSON"}), 400
         
         predicted_label = prediction_pipeline.model_data_prediction(raw_data)
-        
         return predicted_label
 
     except Exception as e:

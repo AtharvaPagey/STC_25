@@ -71,59 +71,68 @@ const LoginOrRegister = asyncHandler(async (req, res) => {
 });
 
 const predictdiseaseandmed = asyncHandler(async (req, res) => {
-  const { symptoms, travelHistory, occupation, foodData } = req.body;
+  const { symptoms, travelHistory, occupation } = req.body;
   const user = req.user;
+  
+  const foodDataArray = req.body.foodData || [];
+  const foodDataString = foodDataArray.join(',');
+
 
   const raw_data = {
     age: user.age,
     gender: user.gender,
     symptoms: symptoms,
-    travelHistory: travelHistory,
+    travel_history: travelHistory,
     occupation: occupation,
-    food: foodData,
+    food: foodDataString,
   };
 
-  let predictionResponse;
   try {
-    predictionResponse = await axios.post(
+    const predictionResponse = await axios.post(
       "http://localhost:5001/predict",
       raw_data
     );
+
+    const diseaseName = predictionResponse.data.diseaseName;
+
+    if (!diseaseName) {
+      throw new ApiError(
+        404,
+        "Could not determine a disease from the provided data."
+      );
+    }
+
+    const output = await getTreatmentsForDisease(diseaseName);
+    if (!output) {
+      throw new ApiError(500, "Could not find treatments for the predicted disease.");
+    }
+
+    try {
+      await PredictionHistory.create({
+        user: user._id,
+        predictedDisease: diseaseName,
+        prescribedMeds: output.medicines || [],
+        prescribedYogas: output.yogasanas || [],
+      });
+    } catch (dbError) {
+      console.error("Failed to save prediction history to Atlas:", dbError.message);
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, output, "Prediction successful"));
+      
   } catch (error) {
-    console.error("Error connecting to the prediction service:", error.message);
-    throw new ApiError(
-      502,
-      "The prediction service is currently unavailable or returned an error."
-    );
+    console.error("Error in prediction flow:", error.response ? error.response.data : error.message);
+    
+    if (error.response) {
+      throw new ApiError(502, "The prediction service returned an error.");
+    } else if (error.request) {
+      throw new ApiError(503, "The prediction service is unavailable.");
+    } else {
+      throw new ApiError(500, error.message || "An unexpected error occurred.");
+    }
   }
-
-  const diseaseName = predictionResponse.data.diseaseName;
-
-  if (!diseaseName) {
-    throw new ApiError(
-      404,
-      "Could not determine a disease from the provided data."
-    );
-  }
-
-  const output = await getTreatmentsForDisease(diseaseName);
-  if (!output) {
-    throw new ApiError(500, "Could not find treatments for the predicted disease.");
-  }
-
-  try {
-    await PredictionHistory.create({
-      predictedDisease: diseaseName,
-      prescribedMeds: output.medicines || [],
-      prescribedYogas: output.yogasanas || [],
-    });
-  } catch (dbError) {
-    console.error("Failed to save prediction history to Atlas:", dbError.message);
-  }
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, output, "Prediction successful"));
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
