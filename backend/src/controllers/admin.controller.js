@@ -137,10 +137,41 @@ const deleteUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, { deletedUserId: userId }, "User deleted successfully"));
 });
 
+const uploadCSVData = asyncHandler(async (req, res) => {
+const { modelName } = req.params; 
+    if (!req.file) {
+        throw new ApiError(400, "CSV file is required. Please upload a file.");
+    }
+    const Model = modelMap[modelName.toLowerCase()];
+    if (!Model) {
+        throw new ApiError(
+            400,
+            `Invalid model name. Must be one of: ${Object.keys(modelMap).join(", ")}`
+        );
+    }
+
+    const filePath = req.file.path;
+    try {
+        const result = await uploaddata(filePath, Model);
+        return res.status(200).json(result);
+    } catch (error) {
+        throw error;
+    } finally {
+        if (filePath) {
+            try {
+                await fs.unlink(filePath);
+            } catch (unlinkErr) {
+                console.error(`Error deleting temporary file ${filePath}:`, unlinkErr);
+            }
+        }
+    }
+});
+
 export {
     adminLogin,
     adminLogout,
     modelfinetuner,
     getAllUsers,
-    deleteUser
+    deleteUser,
+    uploadCSVData
 };

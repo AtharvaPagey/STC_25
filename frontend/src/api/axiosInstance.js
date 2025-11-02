@@ -1,15 +1,17 @@
-// src/api/axiosInstance.js
 import axios from "axios";
+import { getAuth, signOut } from "firebase/auth";
+import { app } from "../firebaseConfig"; // Make sure this path is correct
 
 const baseURL =
   process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api/v1";
 
 const api = axios.create({
   baseURL,
-  withCredentials: true, // backend sets cookies too
+  withCredentials: true,
 });
 
-// Attach our backend JWT (accessToken) stored in localStorage
+let isRedirecting = false;
+
 api.interceptors.request.use(
   (config) => {
     try {
@@ -18,12 +20,32 @@ api.interceptors.request.use(
         config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${token}`;
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
     return config;
   },
   (err) => Promise.reject(err)
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response ? error.response.status : null;
+
+    if (status === 401) {
+      if (!isRedirecting && window.location.pathname !== "/login") {
+        isRedirecting = true;
+
+        localStorage.removeItem("ACCESS_TOKEN");
+
+        const auth = getAuth(app);
+        signOut(auth).finally(() => {
+          window.location.href = "/login";
+        });
+      }
+    }
+    
+    return Promise.reject(error);
+  }
 );
 
 export default api;

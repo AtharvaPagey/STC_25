@@ -30,16 +30,16 @@ export default function Signup() {
 
       console.log("1. Creating Firebase user...");
       const cred = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("✅ Firebase user created:", cred.user.uid);
+      console.log("Firebase user created:", cred.user.uid);
 
       console.log("2. Updating profile...");
       await updateProfile(cred.user, { displayName: fullName });
-      console.log("✅ Profile updated");
+      console.log("Profile updated");
 
       console.log("3. Getting ID token...");
       const idToken = await cred.user.getIdToken();
       console.log(
-        "✅ Got ID token (first 50 chars):",
+        "Got ID token (first 50 chars):",
         idToken.substring(0, 50) + "..."
       );
 
@@ -63,27 +63,25 @@ export default function Signup() {
         }
       );
 
-      console.log("✅ Backend response:", res.data);
+      console.log("Backend response:", res.data);
 
       const accessToken =
         res?.data?.data?.accessToken || res?.data?.accessToken;
 
       if (accessToken) {
         localStorage.setItem("ACCESS_TOKEN", accessToken);
-        console.log("✅ Token stored");
+        console.log("Token stored");
       }
 
       nav("/dashboard");
     } catch (e) {
-      console.error("❌ FULL ERROR:", e);
-      console.error("❌ Error response:", e.response);
-      console.error("❌ Error response data:", e.response?.data);
+      console.error("FULL ERROR:", e);
+      console.error("Error response:", e.response);
+      console.error("Error response data:", e.response?.data);
 
-      // Parse error
       let errorMessage = "Signup failed";
 
       if (e.code) {
-        // Firebase error
         switch (e.code) {
           case "auth/email-already-in-use":
             errorMessage =
@@ -99,12 +97,10 @@ export default function Signup() {
             errorMessage = e.message || "Firebase signup failed";
         }
       } else if (e.response) {
-        // Backend error
         const backendMsg = e.response?.data?.message || e.response?.data?.error;
         errorMessage = `Backend error: ${backendMsg || e.message}`;
         console.error("Backend returned:", e.response.status, backendMsg);
       } else {
-        // Network or other error
         errorMessage = e.message || "Network error";
       }
 

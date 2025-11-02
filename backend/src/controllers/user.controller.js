@@ -71,8 +71,7 @@ const LoginOrRegister = asyncHandler(async (req, res) => {
 });
 
 const predictdiseaseandmed = asyncHandler(async (req, res) => {
-  const { symptoms, travelHistory, occupation, dailyData } = req.body;
-
+  const { symptoms, travelHistory, occupation, foodData } = req.body;
   const user = req.user;
 
   const raw_data = {
@@ -81,35 +80,50 @@ const predictdiseaseandmed = asyncHandler(async (req, res) => {
     symptoms: symptoms,
     travelHistory: travelHistory,
     occupation: occupation,
-    dailyData: dailyData,
+    food: foodData,
   };
 
+  let predictionResponse;
   try {
-    const predictionResponse = await axios.post(
+    predictionResponse = await axios.post(
       "http://localhost:5001/predict",
       raw_data
     );
-    const diseaseName = predictionResponse.data.diseaseName;
-
-    if (!diseaseName) {
-      throw new ApiError(
-        404,
-        "Could not determine a disease from the provided data."
-      );
-    }
-
-    const output = await getTreatmentsForDisease(diseaseName);
-
-    return res
-      .status(200)
-      .json(new ApiResponse(200, output, "Prediction successful"));
   } catch (error) {
     console.error("Error connecting to the prediction service:", error.message);
     throw new ApiError(
-      500,
+      502,
       "The prediction service is currently unavailable or returned an error."
     );
   }
+
+  const diseaseName = predictionResponse.data.diseaseName;
+
+  if (!diseaseName) {
+    throw new ApiError(
+      404,
+      "Could not determine a disease from the provided data."
+    );
+  }
+
+  const output = await getTreatmentsForDisease(diseaseName);
+  if (!output) {
+    throw new ApiError(500, "Could not find treatments for the predicted disease.");
+  }
+
+  try {
+    await PredictionHistory.create({
+      predictedDisease: diseaseName,
+      prescribedMeds: output.medicines || [],
+      prescribedYogas: output.yogasanas || [],
+    });
+  } catch (dbError) {
+    console.error("Failed to save prediction history to Atlas:", dbError.message);
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, output, "Prediction successful"));
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
@@ -179,29 +193,85 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req.user, "User fetched successfully"));
 });
 
+/**
+ * @desc    Update the current user's account details (name, age, etc.)
+ * @route   PATCH /api/v1/users/update-details
+ * @access  Private
+ */
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
-
-  if (!fullName && !email) {
-    throw new ApiError(
-      400,
-      "At least one field (fullName or email) is required"
-    );
-  }
+  const { fullName, username, age, gender, occupation } = req.body;
 
   const updateData = {};
   if (fullName) updateData.fullName = fullName;
-  if (email) updateData.email = email;
+  if (username) updateData.username = username;
+  if (age) updateData.age = age;
+  if (gender) updateData.gender = gender;
+  if (occupation) updateData.occupation = occupation;
 
-  const user = await User.findByIdAndUpdate(
-    req.user?._id,
-    { $set: updateData },
-    { new: true }
+  if (Object.keys(updateData).length === 0) {
+    throw new ApiError(400, "No fields provided to update.");
+  }
+
+  if (username) {
+    const existingUser = await User.findOne({ username });
+    if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
+      throw new ApiError(409, "Username is already taken.");
+    }
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: updateData,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
   ).select("-password -refreshToken");
+
+  if (!updatedUser) {
+    throw new ApiError(404, "User not found.");
+  }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "Account details updated successfully"));
+    .json(
+      new ApiResponse(200, updatedUser, "Account details updated successfully.")
+    );
+});
+
+/**
+ * @desc    Delete the current user's account and all their data
+ * @route   DELETE /api/v1/users/delete-account
+ * @access  Private
+ */
+const deleteUser = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    await PredictionHistory.deleteMany({ user: userId });
+  } catch (dbError) {
+    console.error("Failed to delete user's prediction history:", dbError);
+    throw new ApiError(500, "Failed to delete associated user data.");
+  }
+
+  const deletedUser = await User.findByIdAndDelete(userId);
+
+  if (!deletedUser) {
+    throw new ApiError(404, "User not found.");
+  }
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+  });
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, {}, "User account deleted successfully.")
+    );
 });
 
 export {
@@ -211,4 +281,5 @@ export {
   getCurrentUser,
   updateAccountDetails,
   predictdiseaseandmed,
+  deleteUser
 };

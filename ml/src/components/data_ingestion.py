@@ -31,27 +31,3 @@ class DataIngestion:
             )
         except Exception as e:
             raise CustomExeception(e, sys)
-
-
-    def prediction_data_ingestion(self, data: dict):
-        try:
-            food = (
-                data.get('foodday1', '') + 
-                data.get('foodday2', '') + 
-                data.get('foodday3', '') + 
-                data.get('foodday4', '') + 
-                data.get('foodday5', '')
-            )
-
-            new_row = {
-                'food': food,
-                'age': data.get('age'),
-                'gender': data.get('gender'),
-                'occupation': data.get('occupation'),
-                'travel_history': data.get('travel_history'),
-                'symptoms': data.get('symptoms')
-            }
-
-            return new_row
-        except Exception as e:
-            raise CustomExeception(e, sys)

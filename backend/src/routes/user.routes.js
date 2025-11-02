@@ -6,7 +6,8 @@ import {
     refreshAccessToken,
     getCurrentUser,
     updateAccountDetails,
-    predictdiseaseandmed
+    predictdiseaseandmed,
+    deleteUser
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 import { verifyFirebaseToken } from "../middlewares/auth.middlewares.js";
@@ -18,17 +19,17 @@ router.route("/refresh-token").post(refreshAccessToken);
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/current-user").get(verifyJWT, getCurrentUser);
 router.route("/update-details").patch(verifyJWT, updateAccountDetails);
+router.route("/delete-account").delete(verifyJWT, deleteUser);
 
 router.route("/predict").post(
     verifyJWT,
     [
         body('symptoms', 'Symptoms are required').notEmpty().isString(),
-        body('dailyData', 'Daily data must be an array').isArray({ min: 1 }),
+        body('dailyData', 'Daily data must be an array').notEmpty().isString(),
         body('travelHistory').optional().isString(),
         body('occupation').optional().isString()
     ],
     predictdiseaseandmed
 );
-
 
 export default router;
