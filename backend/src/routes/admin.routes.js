@@ -1,15 +1,16 @@
 import { Router } from "express";
 import {
-    uploadToDisk,
-    uploadToMemory,
+  uploadToDisk,
+  uploadToMemory,
 } from "../middlewares/multer.middlewares.js";
 import {
-    adminLogin,
-    adminLogout,
-    modelfinetuner,
-    getAllUsers,
-    deleteUser,
-    uploadCSVData,
+  adminLogin,
+  adminLogout,
+  modelfinetuner,
+  getAllUsers,
+  deleteUser,
+  uploadCSVData,
+  checkAdminStatus,
 } from "../controllers/admin.controller.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 import { verifyAdmin } from "../middlewares/auth.admin.middlewares.js";
@@ -20,18 +21,17 @@ router.route("/login").post(adminLogin);
 
 router.use(verifyJWT, verifyAdmin);
 
+router.route("/check-status").get(checkAdminStatus);
 router.route("/logout").post(adminLogout);
 router.route("/users").get(getAllUsers);
 router.route("/users/:userId").delete(deleteUser);
 
-router.route("/finetune-model").post(
-    uploadToMemory.single("file"),
-    modelfinetuner
-);
+router
+  .route("/finetune-model")
+  .post(uploadToMemory.single("file"), modelfinetuner);
 
-router.route("/upload/:modelName").post(
-    uploadToDisk.single("csvfile"),
-    uploadCSVData
-);
+router
+  .route("/upload/:modelName")
+  .post(uploadToDisk.single("csvfile"), uploadCSVData);
 
 export default router;
