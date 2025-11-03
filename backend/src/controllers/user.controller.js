@@ -70,34 +70,18 @@ const LoginOrRegister = asyncHandler(async (req, res) => {
     );
 });
 
-// In backend/src/controllers/user.controller.js
-// ONLY REPLACE the predictdiseaseandmed function, keep everything else
-
 const predictdiseaseandmed = asyncHandler(async (req, res) => {
-<<<<<<< HEAD
-  const { symptoms, travelHistory, occupation , foodDataString} = req.body;
-=======
-  const { symptoms, travelHistory, occupation, foodData } = req.body;
->>>>>>> 18503b91f528b8d006c64dc4286fcee7630e4597
-  const user = req.user;
+  const { symptoms, travelHistory, occupation , foodData} = req.body;
 
-  console.log("📦 Received foodData:", foodData); // Debug log
-
-  // foodData is now a string like "rice, dal, roti"
   const raw_data = {
-    age: user.age,
-    gender: user.gender,
+    age: User.age,
+    gender: User.gender,
     symptoms: symptoms,
     travel_history: travelHistory,
     occupation: occupation,
-<<<<<<< HEAD
-    food: foodDataString
-=======
-    food: foodData || "", // Use foodData directly as string
->>>>>>> 18503b91f528b8d006c64dc4286fcee7630e4597
+    food: foodData || ""
   };
 
-  console.log("🚀 Sending to ML:", raw_data); // Debug log
 
   try {
     const predictionResponse = await axios.post(
@@ -127,7 +111,7 @@ const predictdiseaseandmed = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, output, "Prediction successful"));
   } catch (error) {
     console.error(
-      "❌ Error in prediction:",
+      "Error in prediction:",
       error.response ? error.response.data : error.message
     );
 
@@ -233,6 +217,24 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Account details updated successfully"));
 });
 
+const deleteUser = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId?.trim()) {
+        throw new ApiError(400, "User ID is required");
+    }
+
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+        throw new ApiError(404, "User not found or has already been deleted");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, { deletedUserId: userId }, "User deleted successfully"));
+});
+
 export {
   LoginOrRegister,
   logoutUser,
@@ -240,4 +242,5 @@ export {
   getCurrentUser,
   updateAccountDetails,
   predictdiseaseandmed,
+  deleteUser
 };
