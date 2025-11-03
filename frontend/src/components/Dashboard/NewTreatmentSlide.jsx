@@ -21,14 +21,22 @@ export default function NewTreatmentSlide({ onClose, onSubmit }) {
 
     setSubmitting(true);
     try {
+      // Join all foods into a single comma-separated string
+      const foodString = foods.filter((f) => f.trim() !== "").join(", ");
+
+      console.log("Sending foodData as string:", foodString);
+
       await onSubmit({
         symptoms,
         travelHistory,
         occupation,
-        dailyData: foods.filter((f) => f.trim() !== ""),
+        foodData: foodString, // Single string instead of array
       });
     } catch (error) {
       console.error("Submit error:", error);
+      alert(
+        "Submission failed: " + (error.response?.data?.message || error.message)
+      );
     } finally {
       setSubmitting(false);
     }
