@@ -71,11 +71,8 @@ const LoginOrRegister = asyncHandler(async (req, res) => {
 });
 
 const predictdiseaseandmed = asyncHandler(async (req, res) => {
-  const { symptoms, travelHistory, occupation } = req.body;
+  const { symptoms, travelHistory, occupation , foodDataString} = req.body;
   const user = req.user;
-  
-  const foodDataArray = req.body.foodData || [];
-  const foodDataString = foodDataArray.join(',');
 
 
   const raw_data = {
@@ -84,7 +81,7 @@ const predictdiseaseandmed = asyncHandler(async (req, res) => {
     symptoms: symptoms,
     travel_history: travelHistory,
     occupation: occupation,
-    food: foodDataString,
+    food: foodDataString
   };
 
   try {

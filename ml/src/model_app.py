@@ -23,8 +23,6 @@ TOKENIZER_PATH = DataTransformationConfig().preprocessor_obj_file_path
 BASE_MODEL_NAME = "yikuan8/Clinical-BigBird"
 
 
-prediction_pipeline = Model_Prediction()
-
 @app.route('/predict', methods=['POST'])
 def handle_prediction():
     try:
@@ -32,7 +30,7 @@ def handle_prediction():
         if not raw_data:
             return jsonify({"error": "No field provided in JSON"}), 400
         
-        predicted_label = prediction_pipeline.model_data_prediction(raw_data)
+        predicted_label = Model_Prediction().model_data_prediction(raw_data)
         return predicted_label
 
     except Exception as e:

@@ -68,7 +68,7 @@ class DataTranformation:
             food_items = [item.strip() for item in food.split(',')]
             unique_items = list(dict.fromkeys(item for item in food_items if item))
             food = ", ".join(unique_items)
-            food = ', Food Eaten in Last 5 Days ' + food
+            food = ', Food Eaten in Last 5 Days ' + str(food)
             logging.info("data cleaning has started")
 
             age = ' of age ' + str(data['age'])
