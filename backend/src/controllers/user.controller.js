@@ -74,12 +74,12 @@ const predictdiseaseandmed = asyncHandler(async (req, res) => {
   const { symptoms, travelHistory, occupation , foodData} = req.body;
 
   const raw_data = {
-    age: User.age,
-    gender: User.gender,
+    age: User.age || "25",
+    gender: User.gender || "Male",
     symptoms: symptoms,
     travel_history: travelHistory,
     occupation: occupation,
-    food: foodData || ""
+    food: foodData || "apple, pineapple , papaya, onion"
   };
 
 
@@ -89,7 +89,8 @@ const predictdiseaseandmed = asyncHandler(async (req, res) => {
       raw_data
     );
 
-    const diseaseName = predictionResponse.data.diseaseName;
+    const diseaseName = predictionResponse;
+    console.log(diseaseName)
 
     if (!diseaseName) {
       throw new ApiError(
@@ -193,28 +194,56 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
-
-  if (!fullName && !email) {
-    throw new ApiError(
-      400,
-      "At least one field (fullName or email) is required"
-    );
+  const { fullName, email, age, gender } = req.body;
+  
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError(404, "User not found.");
   }
 
-  const updateData = {};
-  if (fullName) updateData.fullName = fullName;
-  if (email) updateData.email = email;
+  const mongoUpdateData = {};
+  const firebaseUpdateData = {};
 
-  const user = await User.findByIdAndUpdate(
-    req.user?._id,
-    { $set: updateData },
-    { new: true }
-  ).select("-password -refreshToken");
+  if (fullName && fullName !== user.fullname) {
+    mongoUpdateData.fullname = fullName;
+    firebaseUpdateData.displayName = fullName;
+  }
+  if (email && email !== user.email) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+      throw new ApiError(409, "This email is already taken.");
+    }
+    mongoUpdateData.email = email;
+    firebaseUpdateData.email = email;
+  }
+  if (age) mongoUpdateData.age = age;
+  if (gender) mongoUpdateData.gender = gender;
+
+  if (Object.keys(mongoUpdateData).length === 0) {
+    throw new ApiError(400, "No fields provided to update.");
+  }
+
+  if (Object.keys(firebaseUpdateData).length > 0) {
+    try {
+      await admin.auth().updateUser(user.firebaseUID, firebaseUpdateData);
+    } catch (firebaseError) {
+      if (firebaseError.code === "auth/email-already-exists") {
+        throw new ApiError(409, "This email is already in use by another account.");
+      }
+      console.error("Firebase update failed:", firebaseError);
+      throw new ApiError(500, "Failed to update authentication details.");
+    }
+  }
+  Object.assign(user, mongoUpdateData);
+  const updatedUser = await user.save({ validateBeforeSave: true });
+
+  const userResponse = await User.findById(updatedUser._id).select(
+    "-password -refreshToken -firebaseUID"
+  );
 
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "Account details updated successfully"));
+    .json(new ApiResponse(200, userResponse, "Account details updated successfully"));
 });
 
 const deleteUser = asyncHandler(async (req, res) => {

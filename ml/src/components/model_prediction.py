@@ -32,6 +32,7 @@ class Model_Prediction:
                 logits = outputs.logits
                 pred_class_id = torch.argmax(logits, dim = -1).item()
                 predicted_label = model.config.id2label[pred_class_id]
+                print(predicted_label)
             
             return (predicted_label)
 

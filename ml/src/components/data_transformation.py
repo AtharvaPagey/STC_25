@@ -87,7 +87,15 @@ class DataTranformation:
 
             symptoms = ', Symptoms are ' + str(data['symptoms'])
             logging.info("Data cleaning done and text created")
-            text = str(gender + age + occupation + travel_history + symptoms + food + extra_info)
+            text = ""
+            text += str(gender)
+            text += str(age)
+            text+= str(occupation)
+            text += str(travel_history)
+            text+= str(symptoms)
+            text += str(food)
+            text += str(extra_info)
+            # text = str(gender + age + occupation + travel_history + symptoms + food + extra_info)
             return(text)
 
         except Exception as e:

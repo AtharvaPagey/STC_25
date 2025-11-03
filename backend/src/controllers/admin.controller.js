@@ -18,10 +18,6 @@ const generateAccessAndRefereshTokens = async (userId) => {
     }
 };
 
-/**
- * @description Handle admin login using email and password
- * @route POST /api/v1/admin/login
- */
 const adminLogin = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -52,10 +48,7 @@ const adminLogin = asyncHandler(async (req, res) => {
         );
 });
 
-/**
- * @description Handle admin logout
- * @route POST /api/v1/admin/logout
- */
+
 const adminLogout = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
@@ -72,10 +65,7 @@ const adminLogout = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Admin logged out successfully"));
 });
 
-/**
- * @description Starts the ML model fine-tuning process (admin only)
- * @route POST /api/v1/admin/finetune-model
- */
+
 const modelfinetuner = asyncHandler(async (req, res) => {
     const { newData } = req.body;
 
@@ -103,7 +93,7 @@ const modelfinetuner = asyncHandler(async (req, res) => {
 });
 
 const getAllUsers = asyncHandler(async (req, res) => {
-    const users = await User.find({}).select("-password -refreshToken");
+    const users = await User.find({}).select("-password -refreshToken -prevDisease -firebaseUID");
 
     if (!users) {
         throw new ApiError(404, "No users found in the database");
@@ -114,11 +104,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, users, "All users fetched successfully"));
 });
 
-
-/**
- * @description Delete a specific user by their ID (admin only)
- * @route DELETE /api/v1/admin/users/:userId
- */
 const deleteUser = asyncHandler(async (req, res) => {
     const { userId } = req.params;
 
