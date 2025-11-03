@@ -9,6 +9,7 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
+  const [age, setAge] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
@@ -20,12 +21,16 @@ export default function Signup() {
 
     try {
       // Frontend validation
-      if (!email || !password || !fullName || !username) {
+      if (!email || !password || !fullName || !username || !age) {
         throw new Error("All fields are required");
       }
 
       if (password.length < 6) {
         throw new Error("Password must be at least 6 characters");
+      }
+
+      if (isNaN(age) || age < 1) {
+        throw new Error("Please enter a valid age");
       }
 
       console.log("1. Creating Firebase user...");
@@ -44,7 +49,7 @@ export default function Signup() {
       );
 
       console.log("4. Sending to backend with payload:", {
-        age: null,
+        age,
         username,
         fullName,
         gender: null,
@@ -53,7 +58,7 @@ export default function Signup() {
       const res = await api.post(
         "/users/login",
         {
-          age: null,
+          age,
           username,
           fullName,
           gender: null,
@@ -84,8 +89,13 @@ export default function Signup() {
       if (e.code) {
         switch (e.code) {
           case "auth/email-already-in-use":
-            errorMessage =
-              "This email is already registered. Try logging in instead.";
+            if (email === "admin@yourdomain.com") {
+              errorMessage =
+                "Admin account already exists. Please use login instead.";
+            } else {
+              errorMessage =
+                "This email is already registered. Try logging in instead.";
+            }
             break;
           case "auth/invalid-email":
             errorMessage = "Invalid email format.";
@@ -159,6 +169,18 @@ export default function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Age</label>
+            <input
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500"
+              placeholder="Your age"
+              type="number"
+              min="1"
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              required
             />
           </div>
           <button
