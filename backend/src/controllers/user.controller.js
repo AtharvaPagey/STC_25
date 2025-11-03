@@ -74,12 +74,12 @@ const predictdiseaseandmed = asyncHandler(async (req, res) => {
   const { symptoms, travelHistory, occupation , foodData} = req.body;
 
   const raw_data = {
-    age: User.age || "25",
-    gender: User.gender || "Male",
+    age: User.age || "",
+    gender: User.gender || "",
     symptoms: symptoms,
     travel_history: travelHistory,
     occupation: occupation,
-    food: foodData || "apple, pineapple , papaya, onion"
+    food: foodData || ""
   };
 
 
